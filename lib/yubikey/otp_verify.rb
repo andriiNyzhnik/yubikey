@@ -2,7 +2,7 @@ require 'base64'
 require 'securerandom'
 require "net/http"
 require "uri"
-
+require 'pry'
 module Yubikey
   
   class OTP::Verify
@@ -53,10 +53,9 @@ module Yubikey
 
       @status = result[/status=(.*)$/,1].strip
       
-      if @status == 'BAD_OTP' || @status == 'BACKEND_ERROR'
-        raise OTP::InvalidOTPError, "Received error: #{@status}"
-      end
-
+      fail OTP::InvalidOTPError, "Received error: #{@status}" if @status == 'BAD_OTP'# || @status == 'BACKEND_ERROR'
+      fail OTP::BACKEND_ERROR, "Received error: #{@status}" if @status == 'BACKEND_ERROR'
+      binding.pry
       if ! verify_response(result)
         @status = 'BAD_RESPONSE'
         return
